@@ -376,7 +376,20 @@ public class Cafe {
 
 // Rest of the functions definition go in here
 
-  public static void Menu(Cafe esql){}
+  public static void Menu(Cafe esql){
+      try{
+         String query = "SELECT itemName, type, price, description FROM Menu WHERE itemName= ";
+         System.out.print("\tEnter itemName: ");
+         String input = in.readLine();
+         input = "'" + input + "'";
+         query += input;
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+
 
   public static void UpdateProfile(Cafe esql){}
 
