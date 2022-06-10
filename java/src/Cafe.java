@@ -30,6 +30,9 @@ import java.util.ArrayList;
  *
  */
 public class Cafe {
+   
+
+   private static String authorisedUser = null;
 
    // reference to physical database connection.
    private Connection _connection = null;
@@ -225,6 +228,7 @@ public class Cafe {
     *
     * @param args the command line arguments this inclues the <mysql|pgsql> <login file>
     */
+  
    public static void main (String[] args) {
       if (args.length != 3) {
          System.err.println (
@@ -233,15 +237,12 @@ public class Cafe {
             Cafe.class.getName () +
             " <dbname> <port> <user>");
          return;
-      }//end if
+      }
 
       Greeting();
       Cafe esql = null;
       try{
-         // use postgres JDBC driver.
          Class.forName ("org.postgresql.Driver").newInstance ();
-         // instantiate the Cafe object and creates a physical
-         // connection.
          String dbname = args[0];
          String dbport = args[1];
          String user = args[2];
@@ -249,60 +250,90 @@ public class Cafe {
 
          boolean keepon = true;
          while(keepon) {
-            // These are sample SQL statements
             System.out.println("MAIN MENU");
             System.out.println("---------");
             System.out.println("1. Create user");
             System.out.println("2. Log in");
             System.out.println("9. < EXIT");
-            String authorisedUser = null;
+            authorisedUser = null;
             switch (readChoice()){
                case 1: CreateUser(esql); break;
                case 2: authorisedUser = LogIn(esql); break;
                case 9: keepon = false; break;
                default : System.out.println("Unrecognized choice!"); break;
-            }//end switch
+            }
             if (authorisedUser != null) {
               boolean usermenu = true;
-              while(usermenu) {
-                System.out.println("MAIN MENU");
-                System.out.println("---------");
-		System.out.println("1. View Menu");
-                System.out.println("2. Search Menu by itemName");
-                System.out.println("3. Update Profile");
-                System.out.println("4. Place a Order");
-                System.out.println("5. Update a Order");
-                System.out.println(".........................");
-                System.out.println("9. Log out");
-                switch (readChoice()){
-		   case 1: Menu(esql); break;
-                   case 2: SearchMenuByName(esql); break;
-                   case 3: UpdateProfile(esql); break;
-                   case 4: PlaceOrder(esql); break;
-                   case 5: UpdateOrder(esql); break;
-                   case 9: usermenu = false; break;
-                   default : System.out.println("Unrecognized choice!"); break;
-                }
-              }
+              String usertype = UserType(esql);
+	      switch (usertype){
+		case "Customer": 
+		  while(usermenu) {
+                    System.out.println("MAIN MENU for Customer");
+                    System.out.println("---------");
+                    System.out.println("0. View menu");
+                    System.out.println("1. Search Menu by Item Name");
+                    System.out.println("2. Search Menu by Item Type");
+                    System.out.println(".........................");
+                    System.out.println("9. Log out");
+                      switch (readChoice()){
+                       case 0: Menu(esql); break;
+                       case 1: SearchMenuByName(esql); break;
+                       case 2: SearchMenuByType(esql); break;
+                       case 9: usermenu = false; break;
+                       default : System.out.println("Unrecognized choice!"); break;
+		      }
+		  } break;
+		case "Employee": 
+		  while(usermenu) {
+                    System.out.println("MAIN MENU for employee");
+                    System.out.println("---------");
+                    System.out.println("0. View menu");
+                    System.out.println("1. Search Menu by Item Name");
+                    System.out.println("2. Search Menu by Item Type");
+                    System.out.println(".........................");
+                    System.out.println("9. Log out");
+                      switch (readChoice()){
+                        case 0: Menu(esql); break;
+                        case 1: SearchMenuByName(esql); break;
+ 		        case 2: SearchMenuByType(esql); break;
+                       case 9: usermenu = false; break;
+                       default : System.out.println("Unrecognized choice!"); break;
+		      }
+		  } break;
+		case "Manager ":
+		  while(usermenu) {
+                    System.out.println("MAIN MENU for manager");
+                    System.out.println("---------");
+                    System.out.println("0. View menu");
+                    System.out.println("1. Search Menu by Item Name");
+                    System.out.println("2. Search Menu by Item Type");
+                    System.out.println(".........................");
+                    System.out.println("9. Log out");
+                      switch (readChoice()){
+                        case 0: Menu(esql); break;
+                        case 1: SearchMenuByName(esql); break;
+                        case 2: SearchMenuByType(esql); break;
+                        case 9: usermenu = false; break;
+                       default : System.out.println("Unrecognized choice!"); break;
+		      }
+		  } break;
+	      }
             }
-         }//end while
+         }
       }catch(Exception e) {
          System.err.println (e.getMessage ());
       }finally{
-         // make sure to cleanup the created table and close the connection.
          try{
             if(esql != null) {
                System.out.print("Disconnecting from database...");
                esql.cleanup ();
                System.out.println("Done\n\nBye !");
-            }//end if
-         }catch (Exception e) {
-            // ignored.
-         }//end try
-      }//end try
-   }//end main
+            }
+         }catch (Exception e) {}
+      }
+   }
 
-   public static void Greeting(){
+ public static void Greeting(){
       System.out.println(
          "\n\n*******************************************************\n" +
          "              User Interface      	               \n" +
@@ -378,13 +409,32 @@ public class Cafe {
 
 // Rest of the functions definition go in here
 
+   public static String UserType(Cafe esql){
+      String type;
+      try{
+	 String query = String.format("SELECT type FROM Users WHERE login = '%s';", authorisedUser);
+	 List<List<String>> result = esql.executeQueryAndReturnResult(query); 
+	 if (result.size() > 0) {
+	    type = result.get(0).get(0);
+	 }
+	 else {
+	    System.err.println("There was an error in retrieving the user type.");
+	    return null;
+	 }
+      }catch(Exception e){
+         System.err.println (e.getMessage ());
+         return null;
+      }
+      return type;
+   }
+
+
    public static void Menu(Cafe esql){
       try{
          String query = "SELECT * FROM Menu";
          
-	 int rowCount = esql.executeQueryAndPrintResult(query);
-        
-	 //System.out.println ("total row(s): " + rowCount);
+	 int rowCount = esql.executeQueryAndPrintResult(query); 
+	
       }catch(Exception e){
           System.err.println (e.getMessage());
        }
@@ -392,10 +442,10 @@ public class Cafe {
   
 public static void SearchMenuByName(Cafe esql){
       try{
-         String query = "SELECT itemName, type, price, description FROM Menu WHERE itemName= ";
+         String query = "SELECT * FROM Menu WHERE itemName= ";
          System.out.print("\tEnter itemName: ");
          String input = in.readLine();
-         input = "'" + input + "'";
+         input = "'" + input + "';";
          query += input;
 
          int rowCount = esql.executeQueryAndPrintResult(query);
@@ -404,6 +454,19 @@ public static void SearchMenuByName(Cafe esql){
       }
    }
 
+   public static void SearchMenuByType(Cafe esql){
+      try{
+         String query = "SELECT * FROM Menu WHERE type= ";
+         System.out.print("\tEnter type: ");
+         String input = in.readLine();
+         input = "'" + input + "';";
+         query += input;
+
+         int rowCount = esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
 
   public static void UpdateProfile(Cafe esql){}
 
