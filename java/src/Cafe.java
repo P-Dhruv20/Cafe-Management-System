@@ -475,7 +475,7 @@ public class Cafe {
          if (result.size() > 0) {
             type = result.get(0).get(0);
          } else {
-            System.err.println("There was an error in retrieving the user type.");
+            System.err.println("Error: User not found");
             return null;
          }
       } catch (Exception e) {
@@ -527,63 +527,75 @@ public class Cafe {
    public static void UpdateProfile(Cafe esql) {
    }
 
-   // while isOrdering = true first create entry in Order table(only once)
-   // While not case 9, (loop)
-   // Run a query on Order table to fetch the current OrderID, store this in java
-   // USE getCurrSeqVal() somehow to get the current value of the OrderID
-   // Prompt which items they would like to order
-   // store in temp string var
-   // Run SQL query to check if item is valid
-   // If true ask how many of that item they would like
-   // store in temp int var
-   // push item name and quantity into vector of vector
-   // repeat process until user indicates they're done ordering
-   // end input loop
-   // USER IS DONE PLACING ORDER
-   // Pop entries from vector, insert into ItemStatus table
-   // don't forget to add lastupdated time for each entry
-   // insert timeStampRecieved in Order table
-   // calculate total
+   /*
+    * while isOrdering = true first create entry in Order table(only once)
+    * // While not case 9, (loop)
+    * // Run a query on Order table to fetch the current OrderID, store this in
+    * java
+    * // USE getCurrSeqVal() somehow to get the current value of the OrderID
+    * // Prompt which items they would like to order
+    * // store in temp string var
+    * // Run SQL query to check if item is valid
+    * // If true ask how many of that item they would like
+    * // store in temp int var
+    * // push item name and quantity into vector of vector
+    * // repeat process until user indicates they're done ordering
+    * // end input loop
+    * // USER IS DONE PLACING ORDER
+    * // Pop entries from vector, insert into ItemStatus table
+    * // don't forget to add lastupdated time for each entry
+    * // insert timeStampRecieved in Order table
+    * // calculate total
+    */
 
    public static Integer PlaceOrder(Cafe esql) {
-      // swap variable dec places
+      /* declare variables */
       boolean isOrdering = true;
+      boolean orderPlaced = false;
       Integer orderId = 0;
-      float price;
-      float total = 0;
+      int querySize;
       String query;
       String item;
-      int querySize;
-      boolean orderPlaced = false;
+      float price;
+      float OrderTotal = 0;
 
       try {
          while (isOrdering) {
-            System.out.println("ORDER MENU");
-            System.out.println("----------");
-            System.out.println("1. Place an order");
-            System.out.println("2. Add an item to the order (must place an order (1) first)");
-            System.out.println("...........................");
-            System.out.println("3. Finish and exit");
+            System.out.println("\nPLACE AN ORDER");
+            System.out.println("----------------");
+            System.out.println("0. View Menu");
+            System.out.println("1. Place order");
+            System.out.println("2. Add an item to created order (if exists already)");
+            System.out.println("---------------------------------");
+            System.out.println("9. Finish Ordering");
 
             switch (readChoice()) {
+               case 0:
+                  Menu(esql);
+                  break;
                case 1:
-                  System.out.println("Enter the item you wish to add to your order: ");
+                  System.out.println("Please enter the ITEM NAME you would like to add to your order");
+                  System.out.println(
+                        "Note: item names are case sensitive and must be spelled correctly, refer to menu if needed");
+                  System.out.print("Enter item name: ");
                   item = in.readLine();
+                  System.out.print("\n");
                   if (item.length() == 0) {
-                     System.out.println("Item cannot be empty.");
+                     System.out.println("ERROR: no input detected.");
                      break;
                   }
-
-                  query = String.format("SELECT * FROM Menu WHERE itemName='%s'", item);
+                  query = "SELECT * FROM Menu WHERE itemName=";
+                  query += "'" + item + "';";
                   querySize = esql.executeQuery(query);
                   if (querySize > 0) {
-                     query = String.format("SELECT price FROM Menu WHERE itemName='%s'", item);
+                     query = "SELECT price FROM Menu WHERE itemName=";
+                     query += "'" + item + "';";
                      List<List<String>> result = esql.executeQueryAndReturnResult(query);
                      if (result.size() > 0) {
-                        String convert = result.get(0).get(0);
-                        price = Float.parseFloat(convert);
+                        String temp = result.get(0).get(0);
+                        price = Float.parseFloat(temp);
                      } else {
-                        System.out.println("There was an error retrieving the price of the item.");
+                        System.out.println("ERROR: item not found");
                         break;
                      }
                      System.out.println(createdAt);
@@ -596,25 +608,30 @@ public class Cafe {
                      orderId = esql.getCurrSeqVal(sequence);
 
                      query = String.format(
-                           "INSERT INTO ItemStatus (orderId, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Hasn''t Started')",
+                           "INSERT INTO ItemStatus (orderId, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Has not started')",
                            orderId, item, createdAt);
 
                      esql.executeUpdate(query);
-                     System.out.println(
-                           "Item " + item + " added to orderID " + orderId + " successfully at " + createdAt + ".");
-                     System.out.println("Your current order total is: " + price);
+                     System.out.printf(
+                           "Success! Item %s has been added to orderID %s at %s.\n", item, orderId, createdAt);
+                     OrderTotal += price;
+                     System.out.printf("Your current total is: $%.2f\n", OrderTotal);
                      orderPlaced = true;
                      break;
                   } else {
-                     System.out.println("Item does not exist.(Case sensitive)");
+                     System.out.println("ERROR: item not found");
                      break;
                   }
                case 2:
                   if (orderPlaced) {
-                     System.out.println("Enter the item you wish to add to your order: ");
+                     System.out.println("Please enter the ITEM NAME you would like to add to your order");
+                     System.out.println(
+                           "Note: item names are case sensitive and must be spelled correctly, refer to menu if needed");
+                     System.out.print("Enter item name: ");
                      item = in.readLine();
+                     System.out.print("\n");
                      if (item.length() == 0) {
-                        System.out.println("Item name cannot be empty.");
+                        System.out.println("ERROR: no input detected.");
                         break;
                      }
                      query = String.format("SELECT * FROM Menu WHERE itemName='%s'", item);
@@ -623,52 +640,49 @@ public class Cafe {
                         String sequence = "Orders_orderId_seq";
                         orderId = esql.getCurrSeqVal(sequence);
                         query = String.format(
-                              "INSERT INTO ItemStatus (orderId, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Hasn''t Started')",
+                              "INSERT INTO ItemStatus (orderId, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Has not Started')",
                               orderId, item, createdAt);
                         esql.executeUpdate(query);
 
                         query = String.format("SELECT price FROM Menu WHERE itemName='%s'", item);
                         List<List<String>> result = esql.executeQueryAndReturnResult(query);
                         if (result.size() > 0) {
-                           String convert = result.get(0).get(0);
-                           price = Float.parseFloat(convert);
+                           String temp = result.get(0).get(0);
+                           price = Float.parseFloat(temp);
                         } else {
-                           System.out.println("There was an error updating total price.");
+                           System.out.println("ERROR: item not found");
                            break;
                         }
 
                         query = String.format("SELECT total FROM Orders WHERE orderId='%s'", orderId);
                         result = esql.executeQueryAndReturnResult(query);
                         if (result.size() > 0) {
-                           String convert = result.get(0).get(0);
-                           total = Float.parseFloat(convert);
+                           String temp = result.get(0).get(0);
+                           OrderTotal = Float.parseFloat(temp);
                         } else {
-                           System.out.println("There was an error updating total price.");
+                           System.out.println("ERROR: Could not update total");
                            break;
                         }
-
-                        total = total + price;
-
-                        query = String.format("UPDATE Orders SET total='%s' WHERE orderId='%s'", total, orderId);
+                        OrderTotal = OrderTotal + price;
+                        query = String.format("UPDATE Orders SET total='%s' WHERE orderId='%s'", OrderTotal, orderId);
                         esql.executeUpdate(query);
-                        System.out.println(
-                              "Item " + item + " added to orderID " + orderId + " successfully at " + createdAt + ".");
-                        System.out.println("Your current order total is now: " + total);
+                        System.out.printf(
+                              "Success! Item %s has been added to orderID %s at %s.\n", item, orderId, createdAt);
+                        System.out.printf("Your current total is: $%.2f\n", OrderTotal);
                         break;
                      } else {
-                        System.out.println("Item does not exist.(Case sensitive)");
+                        System.out.println("ERROR: item not found");
                         break;
                      }
                   } else {
-                     System.out.println("You have yet to start on your order.");
+                     System.out.println("ERROR: No order has been placed yet");
                      break;
                   }
-               case 3:
+               case 9:
                   if (orderPlaced) {
-                     System.out.println("Your final total is: " + total);
+                     System.out.printf("Grand total: $%.2f\n", OrderTotal);
                   }
                   isOrdering = false;
-
                   break;
             }
          }
