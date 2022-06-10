@@ -267,17 +267,19 @@ public class Cafe {
               while(usermenu) {
                 System.out.println("MAIN MENU");
                 System.out.println("---------");
-                System.out.println("1. Goto Menu");
-                System.out.println("2. Update Profile");
-                System.out.println("3. Place a Order");
-                System.out.println("4. Update a Order");
+		System.out.println("1. View Menu");
+                System.out.println("2. Search Menu by itemName");
+                System.out.println("3. Update Profile");
+                System.out.println("4. Place a Order");
+                System.out.println("5. Update a Order");
                 System.out.println(".........................");
                 System.out.println("9. Log out");
                 switch (readChoice()){
-                   case 1: Menu(esql); break;
-                   case 2: UpdateProfile(esql); break;
-                   case 3: PlaceOrder(esql); break;
-                   case 4: UpdateOrder(esql); break;
+		   case 1: Menu(esql); break;
+                   case 2: SearchMenuByName(esql); break;
+                   case 3: UpdateProfile(esql); break;
+                   case 4: PlaceOrder(esql); break;
+                   case 5: UpdateOrder(esql); break;
                    case 9: usermenu = false; break;
                    default : System.out.println("Unrecognized choice!"); break;
                 }
@@ -376,7 +378,19 @@ public class Cafe {
 
 // Rest of the functions definition go in here
 
-  public static void Menu(Cafe esql){
+   public static void Menu(Cafe esql){
+      try{
+         String query = "SELECT * FROM Menu";
+         
+	 int rowCount = esql.executeQueryAndPrintResult(query);
+        
+	 //System.out.println ("total row(s): " + rowCount);
+      }catch(Exception e){
+          System.err.println (e.getMessage());
+       }
+}
+  
+public static void SearchMenuByName(Cafe esql){
       try{
          String query = "SELECT itemName, type, price, description FROM Menu WHERE itemName= ";
          System.out.print("\tEnter itemName: ");
