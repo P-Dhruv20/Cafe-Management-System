@@ -1245,22 +1245,22 @@ public class Cafe {
     String userName;
     int value;
     boolean isActive = true;
-    System.out.println("Please enter the user name: ");
-    userName = in.readLine();
-    query = String.format("SELECT * FROM Users WHERE login='%s'", userName);
-    value = esql.executeQuery(query);
-    if (value > 0) {
-      while (isActive) {
-        try {
-          System.out.println("UPDATE User Profile for " + userName);
-          System.out.println("-------------------");
-          System.out.println("1. Change favorite items");
-          System.out.println("2. Change password");
-          System.out.println("3. Change user type");
-          System.out.println("........................");
-          System.out.println("9. Done updating");
-          switch (readChoice()) {
-            case 1:
+    while (isActive) {
+      try {
+        System.out.println("UPDATE User Profile for " + userName);
+        System.out.println("-------------------");
+        System.out.println("1. Change favorite items");
+        System.out.println("2. Change password");
+        System.out.println("3. Change user type");
+        System.out.println("........................");
+        System.out.println("9. Done updating");
+        switch (readChoice()) {
+          case 1:
+            System.out.println("Please enter the user name: ");
+            userName = in.readLine();
+            query = String.format("SELECT * FROM Users WHERE login='%s'", user);
+            value = esql.executeQuery(query);
+            if (value > 0) {
               query =
                 String.format(
                   "SELECT favItems FROM Users WHERE login='%s'",
@@ -1272,22 +1272,32 @@ public class Cafe {
               System.out.println("\n");
 
               System.out.println(
-                "Please enter the your new favorite item name: "
+                "Please enter the your new favorite input name: "
               );
               input = in.readLine();
               query =
                 String.format(
                   "UPDATE Users SET favItems='%s' WHERE login='%s'",
                   input,
-                  user
+                  userName
                 );
               esql.executeUpdate(query);
               System.out.println("Favorite item updated.");
               break;
-            case 2:
+            } else {
+              System.out.println("This user does not exist.");
+              break;
+            }
+          case 2:
+            System.out.println("Please enter the user name: ");
+            userName = in.readLine();
+            query =
+              String.format("SELECT * FROM Users WHERE login='%s'", userName);
+            value = esql.executeQuery(query);
+            if (value > 0) {
               System.out.println("Please enter the new password: ");
               input = in.readLine();
-              if (item.length() == 0) {
+              if (input.length() == 0) {
                 System.out.println("ERROR: no input provided");
                 break;
               }
@@ -1299,11 +1309,20 @@ public class Cafe {
                 );
               esql.executeUpdate(query);
               System.out.println("Password updated.");
+            } else {
+              System.out.println("This user does not exist.");
               break;
-            case 3:
+            }
+          case 3:
+            System.out.println("Please enter the user name: ");
+            userName = in.readLine();
+            query =
+              String.format("SELECT * FROM Users WHERE login='%s'", userName);
+            value = esql.executeQuery(query);
+            if (value > 0) {
               boolean isSubMenuActive = true;
               while (isSubMenuActive) {
-                System.out.println("UPDATE USER TYPE");
+                System.out.println("UPDATE USER TYPE for " + userName);
                 System.out.println("-----------------------");
                 System.out.println("1. Customer");
                 System.out.println("2. Employee");
@@ -1318,6 +1337,7 @@ public class Cafe {
                         userName
                       );
                     esql.executeUpdate(query);
+                    System.out.println("User type updated to Customer.");
                     break;
                   case 2:
                     query =
@@ -1326,6 +1346,7 @@ public class Cafe {
                         userName
                       );
                     esql.executeUpdate(query);
+                    System.out.println("User type updated to Employee.");
                     break;
                   case 3:
                     query =
@@ -1334,6 +1355,7 @@ public class Cafe {
                         userName
                       );
                     esql.executeUpdate(query);
+                    System.out.println("User type updated to Manager.");
                     break;
                   case 9:
                     isSubMenuActive = false;
@@ -1342,22 +1364,20 @@ public class Cafe {
                     System.out.println("Unrecognized choice!");
                     break;
                 }
-                System.out.println("User type updated.");
               }
-              break;
-            case 9:
-              isActive = false;
-              break;
-            default:
-              System.out.println("Unrecognized choice!");
-              break;
-          }
-        } catch (Exception e) {
-          System.err.println(e.getMessage());
+            } else {
+              System.out.println("This user does not exist.");
+            }
+          case 9:
+            isActive = false;
+            break;
+          default:
+            System.out.println("Unrecognized choice!");
+            break;
         }
+      } catch (Exception e) {
+        System.err.println(e.getMessage());
       }
-    } else {
-      System.out.println("ERROR: user not found");
     }
   }
 
