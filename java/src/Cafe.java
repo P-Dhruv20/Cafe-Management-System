@@ -283,6 +283,10 @@ public class Cafe {
                         System.out.println("1. Search Menu by Item Name");
                         System.out.println("2. Search Menu by Item Type");
                         System.out.println("3. Place an order");
+                        System.out.println("4. Update order");
+                        System.out.println("5. View order history");
+                        System.out.println("6. View order status");
+                        System.out.println("7. Update user information");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         switch (readChoice()) {
@@ -298,6 +302,15 @@ public class Cafe {
                            case 3:
                               PlaceOrder(esql);
                               break;
+                           case 4:
+                              UpdateOrder(esql);
+                              break;
+			   case 5:
+				ViewOrderHistory(esql);
+				break;
+			   case 6:
+				ViewOrderStatus(esql);
+				break;
                            case 9:
                               usermenu = false;
                               break;
@@ -315,6 +328,10 @@ public class Cafe {
                         System.out.println("1. Search Menu by Item Name");
                         System.out.println("2. Search Menu by Item Type");
                         System.out.println("3. Place an order");
+                        System.out.println("4. Update order");
+                        System.out.println("5. View Current Orders");
+                        System.out.println("6. View Order Status");
+                        System.out.println("7. Update user information");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         switch (readChoice()) {
@@ -330,6 +347,9 @@ public class Cafe {
                            case 3:
                               PlaceOrder(esql);
                               break;
+			  case 6:
+				ViewOrderStatus(esql);
+				break;
                            case 9:
                               usermenu = false;
                               break;
@@ -347,6 +367,11 @@ public class Cafe {
                         System.out.println("1. Search Menu by Item Name");
                         System.out.println("2. Search Menu by Item Type");
                         System.out.println("3. Place an order");
+                        System.out.println("4. Update order");
+                        System.out.println("5. View Current Orders");
+                        System.out.println("6. View Order Status");
+                        System.out.println("7. Update user information");
+                        System.out.println("8. Update menu");
                         System.out.println(".........................");
                         System.out.println("9. Log out");
                         switch (readChoice()) {
@@ -362,6 +387,9 @@ public class Cafe {
                            case 3:
                               PlaceOrder(esql);
                               break;
+			   case 6:
+				ViewOrderStatus(esql);
+				break;
                            case 9:
                               usermenu = false;
                               break;
@@ -388,7 +416,7 @@ public class Cafe {
       }
    }
 
-   public static void Greeting() {
+    public static void Greeting() {
       System.out.println(
             "\n\n*******************************************************\n" +
                   "              User Interface      	               \n" +
@@ -548,11 +576,11 @@ public class Cafe {
     * // calculate total
     */
 
-   public static Integer PlaceOrder(Cafe esql) {
+  public static Integer PlaceOrder(Cafe esql) {
       /* declare variables */
       boolean isOrdering = true;
       boolean orderPlaced = false;
-      Integer orderId = 0;
+      Integer orderid = 0;
       int querySize;
       String query;
       String item;
@@ -604,16 +632,16 @@ public class Cafe {
                            authorisedUser, createdAt, price);
                      esql.executeUpdate(query);
 
-                     String sequence = "Orders_orderId_seq";
-                     orderId = esql.getCurrSeqVal(sequence);
+                     String sequence = "Orders_orderid_seq";
+                     orderid = esql.getCurrSeqVal(sequence);
 
                      query = String.format(
-                           "INSERT INTO ItemStatus (orderId, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Has not started')",
-                           orderId, item, createdAt);
+                           "INSERT INTO ItemStatus (orderid, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Hasn''t started')",
+                           orderid, item, createdAt);
 
                      esql.executeUpdate(query);
                      System.out.printf(
-                           "Success! Item %s has been added to orderID %s at %s.\n", item, orderId, createdAt);
+                           "Success! Item %s has been added to orderID %s at %s.\n", item, orderid, createdAt);
                      OrderTotal += price;
                      System.out.printf("Your current total is: $%.2f\n", OrderTotal);
                      orderPlaced = true;
@@ -637,11 +665,11 @@ public class Cafe {
                      query = String.format("SELECT * FROM Menu WHERE itemName='%s'", item);
                      querySize = esql.executeQuery(query);
                      if (querySize > 0) {
-                        String sequence = "Orders_orderId_seq";
-                        orderId = esql.getCurrSeqVal(sequence);
+                        String sequence = "Orders_orderid_seq";
+                        orderid = esql.getCurrSeqVal(sequence);
                         query = String.format(
-                              "INSERT INTO ItemStatus (orderId, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Has not Started')",
-                              orderId, item, createdAt);
+                              "INSERT INTO ItemStatus (orderid, itemName, lastUpdated, status) VALUES ('%s', '%s', '%s', 'Hasn''t Started')",
+                              orderid, item, createdAt);
                         esql.executeUpdate(query);
 
                         query = String.format("SELECT price FROM Menu WHERE itemName='%s'", item);
@@ -654,7 +682,7 @@ public class Cafe {
                            break;
                         }
 
-                        query = String.format("SELECT total FROM Orders WHERE orderId='%s'", orderId);
+                        query = String.format("SELECT total FROM Orders WHERE orderid='%s'", orderid);
                         result = esql.executeQueryAndReturnResult(query);
                         if (result.size() > 0) {
                            String temp = result.get(0).get(0);
@@ -664,10 +692,10 @@ public class Cafe {
                            break;
                         }
                         OrderTotal = OrderTotal + price;
-                        query = String.format("UPDATE Orders SET total='%s' WHERE orderId='%s'", OrderTotal, orderId);
+                        query = String.format("UPDATE Orders SET total='%s' WHERE orderid='%s'", OrderTotal, orderid);
                         esql.executeUpdate(query);
                         System.out.printf(
-                              "Success! Item %s has been added to orderID %s at %s.\n", item, orderId, createdAt);
+                              "Success! Item %s has been added to orderID %s at %s.\n", item, orderid, createdAt);
                         System.out.printf("Your current total is: $%.2f\n", OrderTotal);
                         break;
                      } else {
@@ -690,11 +718,125 @@ public class Cafe {
          System.err.println(e.getMessage());
          return null;
       }
-      return orderId;
+      return orderid;
    }
+   
 
    public static void UpdateOrder(Cafe esql) {
+      boolean isMenuOpen = true;
+      try {
+         while (isMenuOpen) {
+            System.out.println("UPDATE ORDER");
+            System.out.println("--------------");
+            System.out.println("0. Update Order");
+            System.out.println("...............");
+            System.out.println("9. Done updating");
+            switch (readChoice()) {
+               case 0:
+                  int inputOrderID;
+                  System.out.print("Enter your orderID:");
+                  try {
+                     inputOrderID = Integer.parseInt(in.readLine());
+                  } catch (Exception e) {
+                     System.out.println("ERROR: invalid input");
+                     break;
+                  }
+                  String query = String.format(
+                        "SELECT * FROM Orders WHERE login = '%s' AND orderid = '%s' AND paid='false'", authorisedUser,
+                        inputOrderID);
+                  int check = esql.executeQuery(query);
+                  if (check <= 0) {
+                     System.out.println("You did not place this order or the order has already been paid.");
+                     break;
+                  } else {
+                     query = String.format(
+                           "Select itemName,comments FROM ItemStatus WHERE orderid = '%s' AND status='Hasn''t Started'",
+                           inputOrderID);
+                     System.out.println("THIS IS YOUR CURRENT ORDER");
+                     System.out.println("NOTE: Only items that can be updated are displayed");
+                     System.out.println("-------------------------------------------------------");
+                     int temp1 = esql.executeQueryAndPrintResult(query);
+                     if (!(temp1 > 0)) {
+                        System.out.println("No items to update");
+                        break;
+                     }
+                     System.out.println(".......................................................");
+                  }
+                  boolean ismodding = true;
+                  while (ismodding) {
+                     System.out.println("EDIT ORDER");
+                     System.out.println("-----------");
+                     System.out.println("0. Add comment");
+                     System.out.println("...............");
+                     System.out.println("9. Done updating");
+                     switch (readChoice()) {
+                        case 0:
+                           System.out.print("Please enter the item name that you would like to update: ");
+                           String item = in.readLine();
+                           query = String.format("SELECT * FROM ItemStatus WHERE orderid='%s' AND itemName='%s'",
+                                 inputOrderID, item);
+                           int check2 = esql.executeQuery(query);
+                           if (!(check2 > 0)) {
+                              System.out.println("ERROR: item does not exist/cannot be updated");
+                              break;
+                           }
+                           System.out
+                                 .print("Please enter the new comment: ");
+                           String userInput = in.readLine();
+                           query = String.format(
+                                 "UPDATE ItemStatus SET comments='%s' AND lastUpdated ='%s' WHERE orderid = '%s' AND itemName='%s'",
+                                 userInput, createdAt, inputOrderID, item);
+                           esql.executeUpdate(query);
+                           break;
+                        case 9:
+                           ismodding = false;
+                           break;
+                     }
+                  }
+                  break;
+               case 9:
+                  isMenuOpen = false;
+                  break;
+            }
+         }
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
 
+   public static void ViewOrderHistory(Cafe esql){
+      try{
+         String query = String.format("SELECT * FROM Orders WHERE login = '%s' ORDER BY orderid desc LIMIT 5", authorisedUser);
+         int rowCount = esql.executeQueryAndPrintResult(query);
+      }catch(Exception e){
+         System.err.println (e.getMessage());
+      }
+   }
+
+   public static void ViewOrderStatus(Cafe esql) {
+      try {
+         String type = UserType(esql);
+         if (type.equals("Customer")) {
+            String query = String.format(
+                  "SELECT I.orderid, I.itemName, I.status FROM ItemStatus I, Orders O WHERE I.orderid=O.orderid AND O.login = '%s' AND O.orderid= ",
+                  authorisedUser);
+            System.out.print("Please enter your orderid: ");
+            String input = in.readLine();
+            query += input;
+            int rowCount = esql.executeQueryAndPrintResult(query);
+            if (rowCount == 0) {
+               System.out.println("ERROR: order not found or you have not placed that orders");
+            }
+         } else {
+            String query = "SELECT itemName, status FROM ItemStatus WHERE orderid= ";
+            System.out.print("Please enter your orderid: ");
+            String input = in.readLine();
+            query += input;
+            int rowCount = esql.executeQueryAndPrintResult(query);
+         }
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
    }
 
 }// end Cafe
