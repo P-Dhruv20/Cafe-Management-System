@@ -530,7 +530,10 @@ public class Cafe {
       );
       int userNum = esql.executeQuery(query);
       if (userNum > 0) return login;
-      return null;
+      else {
+         System.out.println("Incorrect login or password!");
+         return null;
+      } 
     } catch (Exception e) {
       System.err.println(e.getMessage());
       return null;
@@ -895,9 +898,8 @@ public class Cafe {
                   String userInput = in.readLine();
                   query =
                     String.format(
-                      "UPDATE ItemStatus SET comments='%s' AND lastUpdated ='%s' WHERE orderid = '%s' AND itemName='%s'",
-                      userInput,
-                      createdAt,
+                      "UPDATE ItemStatus SET comments='%s' WHERE orderid = '%s' AND itemName='%s'",
+                      userInput, 
                       inputOrderID,
                       item
                     );
@@ -1219,7 +1221,7 @@ public class Cafe {
             inputString = in.readLine();
             query =
               String.format(
-                "UPDATE Users SET phone='%s' WHERE login='%s'",
+                "UPDATE Users SET phoneNum='%s' WHERE login='%s'",
                 inputString,
                 authorisedUser
               );
@@ -1247,7 +1249,7 @@ public class Cafe {
     boolean isActive = true;
     while (isActive) {
       try {
-        System.out.println("UPDATE User Profile for " + userName);
+        System.out.println("UPDATE User Profile");
         System.out.println("-------------------");
         System.out.println("1. Change favorite items");
         System.out.println("2. Change password");
@@ -1258,7 +1260,7 @@ public class Cafe {
           case 1:
             System.out.println("Please enter the user name: ");
             userName = in.readLine();
-            query = String.format("SELECT * FROM Users WHERE login='%s'", user);
+            query = String.format("SELECT * FROM Users WHERE login='%s'", userName);
             value = esql.executeQuery(query);
             if (value > 0) {
               query =
@@ -1414,7 +1416,7 @@ public class Cafe {
                   "SELECT itemName,status FROM ItemStatus WHERE orderid = '%s'",
                   orderid
                 );
-              System.out.println("ITEMS IN THIS ORDER ID" + orderid);
+              System.out.println("ITEMS IN THIS ORDER ID " + orderid);
               System.out.println("---------------------------------");
               int value1 = esql.executeQueryAndPrintResult(query);
               if (!(value1 > 0)) {
@@ -1437,8 +1439,7 @@ public class Cafe {
                     String input = in.readLine();
                     query =
                       String.format(
-                        "UPDATE ItemStatus SET status='Hasn''t Started' AND lastUpdated='%s' WHERE orderid='%s' AND itemName='%s'",
-                        createdAt,
+                        "UPDATE ItemStatus SET status='Hasn''t Started' WHERE orderid='%s' AND itemName='%s'",
                         orderid,
                         input
                       );
@@ -1450,8 +1451,7 @@ public class Cafe {
                     input = in.readLine();
                     query =
                       String.format(
-                        "UPDATE ItemStatus SET status='Started' AND lastUpdated='%s' WHERE orderid='%s' AND itemName='%s'",
-                        createdAt,
+                        "UPDATE ItemStatus SET status='Started' WHERE orderid='%s' AND itemName='%s'",
                         orderid,
                         input
                       );
@@ -1463,8 +1463,7 @@ public class Cafe {
                     input = in.readLine();
                     query =
                       String.format(
-                        "UPDATE ItemStatus SET status='Finished' AND lastUpdated='%s' WHERE orderid='%s' AND itemName='%s'",
-                        createdAt,
+                        "UPDATE ItemStatus SET status='Finished' WHERE orderid='%s' AND itemName='%s'",
                         orderid,
                         input
                       );
@@ -1535,7 +1534,7 @@ public class Cafe {
                     System.out.println("Order paid status updated to not paid");
                     isOrderActive = false;
                     break;
-                  case 3:
+                  case 9:
                     isOrderActive = false;
                     break;
                   default:
@@ -1547,7 +1546,7 @@ public class Cafe {
               System.out.println("ERROR: order id not found");
               break;
             }
-          case 3:
+          case 9:
             isActive = false;
             break;
           default:
