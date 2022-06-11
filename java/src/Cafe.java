@@ -820,6 +820,7 @@ public class Cafe {
 
   public static void UpdateOrder(Cafe esql) {
     boolean isMenuOpen = true;
+    String query;
     try {
       while (isMenuOpen) {
         System.out.println("UPDATE ORDER");
@@ -837,7 +838,7 @@ public class Cafe {
               System.out.print("ERROR: invalid input");
               break;
             }
-            String query = String.format(
+            query = String.format(
               "SELECT * FROM Orders WHERE login = '%s' AND orderid = '%s' AND paid='false'",
               authorisedUser,
               inputOrderID
@@ -847,12 +848,11 @@ public class Cafe {
               System.out.println("ERROR: order not found");
               break;
             } else {
-              query =
-                String.format(
-                  "Select itemName,comments FROM ItemStatus WHERE orderid = '%s' AND status='Hasn''t Started'",
-                  inputOrderID
-                );
-              System.out.println("THIS IS YOUR CURRENT ORDER");
+             query = String.format(
+                  "SELECT I.itemName, I.comments FROM ItemStatus I, Orders O WHERE I.orderid=O.orderid AND O.login = '%s' AND O.orderid='%s' AND I.status='Hasn''t Started'",
+                  authorisedUser,
+                  inputOrderID);
+	      System.out.println("THIS IS YOUR CURRENT ORDER");
               System.out.println(
                 "NOTE: Only items that can be updated are displayed"
               );
