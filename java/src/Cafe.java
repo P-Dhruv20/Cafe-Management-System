@@ -272,13 +272,13 @@ public class Cafe {
                   break;
             }
             if (authorisedUser != null) {
-               boolean usermenu = true;
+               boolean isActive = true;
                String usertype = UserType(esql);
                switch (usertype) {
                   case "Customer":
-                     while (usermenu) {
+                     while (isActive) {
                         System.out.println("MAIN MENU for Customer");
-                        System.out.println("---------");
+                        System.out.println("-------------------------");
                         System.out.println("0. View menu");
                         System.out.println("1. Search Menu by Item Name");
                         System.out.println("2. Search Menu by Item Type");
@@ -311,8 +311,11 @@ public class Cafe {
                            case 6:
                               ViewOrderStatus(esql);
                               break;
+                           case 7:
+                              UpdateUserInformation(esql);
+                              break;
                            case 9:
-                              usermenu = false;
+                              isActive = false;
                               break;
                            default:
                               System.out.println("Unrecognized choice!");
@@ -321,9 +324,9 @@ public class Cafe {
                      }
                      break;
                   case "Employee":
-                     while (usermenu) {
-                        System.out.println("MAIN MENU for employee");
-                        System.out.println("---------");
+                     while (isActive) {
+                        System.out.println("MAIN MENU for Employee");
+                        System.out.println("--------------------------");
                         System.out.println("0. View menu");
                         System.out.println("1. Search Menu by Item Name");
                         System.out.println("2. Search Menu by Item Type");
@@ -355,8 +358,11 @@ public class Cafe {
                            case 6:
                               ViewOrderStatus(esql);
                               break;
+                           case 7:
+                              UpdateUserInformation(esql);
+                              break;
                            case 9:
-                              usermenu = false;
+                              isActive = false;
                               break;
                            default:
                               System.out.println("Unrecognized choice!");
@@ -365,9 +371,9 @@ public class Cafe {
                      }
                      break;
                   case "Manager ":
-                     while (usermenu) {
-                        System.out.println("MAIN MENU for manager");
-                        System.out.println("---------");
+                     while (isActive) {
+                        System.out.println("MAIN MENU for Manager");
+                        System.out.println("------------------------");
                         System.out.println("0. View menu");
                         System.out.println("1. Search Menu by Item Name");
                         System.out.println("2. Search Menu by Item Type");
@@ -401,13 +407,16 @@ public class Cafe {
                               ViewOrderStatus(esql);
                               break;
                            case 9:
-                              usermenu = false;
+                              isActive = false;
                               break;
                            default:
                               System.out.println("Unrecognized choice!");
                               break;
                         }
                      }
+                     break;
+                  default:
+                     System.out.println("Unrecognized choice!");
                      break;
                }
             }
@@ -722,6 +731,9 @@ public class Cafe {
                   }
                   isOrdering = false;
                   break;
+               default:
+                  System.out.println("Unrecognized choice!");
+                  break;
             }
          }
       } catch (Exception e) {
@@ -747,7 +759,7 @@ public class Cafe {
                   try {
                      inputOrderID = Integer.parseInt(in.readLine());
                   } catch (Exception e) {
-                     System.out.println("ERROR: invalid input");
+                     System.out.print("ERROR: invalid input");
                      break;
                   }
                   String query = String.format(
@@ -755,7 +767,7 @@ public class Cafe {
                         inputOrderID);
                   int check = esql.executeQuery(query);
                   if (check <= 0) {
-                     System.out.println("You did not place this order or the order has already been paid.");
+                     System.out.println("ERROR: order not found");
                      break;
                   } else {
                      query = String.format(
@@ -800,11 +812,17 @@ public class Cafe {
                         case 9:
                            ismodding = false;
                            break;
+                        default:
+                           System.out.println("Unrecognized choice!");
+                           break;
                      }
                   }
                   break;
                case 9:
                   isMenuOpen = false;
+                  break;
+               default:
+                  System.out.println("Unrecognized choice!");
                   break;
             }
          }
@@ -849,9 +867,9 @@ public class Cafe {
       }
    }
 
-   public static void ViewCurrentOrder(Cafe esql) {
+   public static void ViewCurrentOrders(Cafe esql) {
       try {
-         String query = "SELECT orderid, timeStampRecieved FROM Orders WHERE paid=false AND timeStampRecieved>=NOW()-'1 day'::INTERVAL";
+         String query = "SELECT * FROM Orders WHERE paid=false AND timeStampRecieved>=NOW()-'1 day'::INTERVAL";
          int rowCount = esql.executeQueryAndPrintResult(query);
       } catch (Exception e) {
          System.err.println(e.getMessage());
@@ -887,14 +905,14 @@ public class Cafe {
                      System.out.println("ERROR: no input provided");
                      break;
                   }
-                  System.out.println("Please enter Item price: ");
+                  System.out.print("Please enter Item price: ");
                   try {
                      itemPrice = Float.parseFloat(in.readLine());
                   } catch (Exception e) {
                      System.out.println("ERROR: invalid input");
                      break;
                   }
-                  System.out.println("Enter the description: ");
+                  System.out.print("Enter the description: ");
                   itemDescription = in.readLine();
                   System.out.println("Enter the image URL: ");
                   itemImageURL = in.readLine();
@@ -906,7 +924,7 @@ public class Cafe {
                   System.out.println("Added item to menu.");
                   break;
                case 2:
-                  System.out.println("Please enter the item name: ");
+                  System.out.print("Please enter the item name: ");
                   itemName = in.readLine();
                   query = String.format("SELECT * FROM Menu WHERE itemName='%s'", itemName);
                   value = esql.executeQuery(query);
@@ -920,7 +938,7 @@ public class Cafe {
                      break;
                   }
                case 3:
-                  System.out.println("Please enter the item name: ");
+                  System.out.print("Please enter the item name: ");
                   itemName = in.readLine();
                   query = String.format("SELECT * FROM Menu WHERE itemName='%s'", itemName);
                   value = esql.executeQuery(query);
@@ -937,7 +955,7 @@ public class Cafe {
                         System.out.println("9. Done updating");
                         switch (readChoice()) {
                            case 1:
-                              System.out.println("Please enter the new type: ");
+                              System.out.print("Please enter the new type: ");
                               itemType = in.readLine();
                               if (itemType.length() == 0) {
                                  System.out.println("ERROR: no input provided");
@@ -949,7 +967,7 @@ public class Cafe {
                               System.out.println("Item type updated.");
                               break;
                            case 2:
-                              System.out.println("Please enter the new price: ");
+                              System.out.print("Please enter the new price: ");
                               try {
                                  itemPrice = Float.parseFloat(in.readLine());
                               } catch (Exception e) {
@@ -959,10 +977,10 @@ public class Cafe {
                               query = String.format("UPDATE Menu SET price='%s' WHERE itemName='%s'", itemPrice,
                                     itemName);
                               esql.executeUpdate(query);
-                              System.out.println("Item price updated.");
+                              System.out.print("Item price updated.");
                               break;
                            case 3:
-                              System.out.println("Please enter the new description: ");
+                              System.out.print("Please enter the new description: ");
                               itemDescription = in.readLine();
                               query = String.format("UPDATE Menu SET description='%s' WHERE itemName='%s'",
                                     itemDescription,
@@ -971,7 +989,7 @@ public class Cafe {
                               System.out.println("Item description updated.");
                               break;
                            case 4:
-                              System.out.println("Please enter the new image URL: ");
+                              System.out.print("Please enter the new image URL: ");
                               itemImageURL = in.readLine();
                               query = String.format("UPDATE Menu SET imageURL='%s' WHERE itemName='%s'", itemImageURL,
                                     itemName);
@@ -981,6 +999,9 @@ public class Cafe {
                            case 9:
                               up_menu = false;
                               break;
+                           default:
+                              System.out.println("Unrecognized choice!");
+                              break;
                         }
                      }
                   } else {
@@ -989,6 +1010,78 @@ public class Cafe {
                   }
                case 9:
                   isActive = false;
+                  break;
+               default:
+                  System.out.println("Unrecognized choice!");
+                  break;
+            }
+         } catch (Exception e) {
+            System.err.println(e.getMessage());
+         }
+      }
+   }
+
+   public static void UpdateUserInformation(Cafe esql) {
+      boolean isActive = true;
+      String inputString;
+      String query;
+      int value;
+      while (isActive) {
+         try {
+            System.out.println("UPDATE USER PROFILE");
+            System.out.println("-----------------------");
+            System.out.println("1. Change favorite items");
+            System.out.println("2. Change password");
+            System.out.println("3. Change phone number");
+            System.out.println("..........................");
+            System.out.println("9. Done updating");
+            switch (readChoice()) {
+               case 1:
+                  query = String.format("SELECT favItems FROM Users WHERE login='%s'", authorisedUser);
+                  System.out.println("FAVORITE ITEMS");
+                  System.out.println("---------------------");
+                  esql.executeQueryAndPrintResult(query);
+                  System.out.print("\n");
+                  System.out.println("Please enter the your new favorite item name: ");
+                  inputString = in.readLine();
+                  query = String.format("UPDATE Users SET favItems='%s' WHERE login='%s'", inputString, authorisedUser);
+                  esql.executeUpdate(query);
+                  System.out.println("Favorite item updated.");
+                  break;
+               case 2:
+                  System.out.println("Please enter the old password: ");
+                  inputString = in.readLine();
+                  query = String.format("SELECT * FROM Users WHERE login='%s' AND password='%s'", authorisedUser,
+                        inputString);
+                  value = esql.executeQuery(query);
+                  if (value > 0) {
+                     System.out.println("Please enter the new password: ");
+                     inputString = in.readLine();
+                     if (inputString.length() == 0) {
+                        System.out.println("ERROR: no input provided");
+                        break;
+                     }
+                     query = String.format("UPDATE Users SET password='%s' WHERE login='%s'", inputString,
+                           authorisedUser);
+                     esql.executeUpdate(query);
+                     System.out.println("Password updated.");
+                     break;
+                  } else {
+                     System.out.println("ERROR: invalid password");
+                     break;
+                  }
+               case 3:
+                  System.out.println("Please enter the new phone number: ");
+                  inputString = in.readLine();
+                  query = String.format("UPDATE Users SET phone='%s' WHERE login='%s'", inputString, authorisedUser);
+                  esql.executeUpdate(query);
+                  System.out.println("Phone number updated.");
+                  break;
+               case 9:
+                  isActive = false;
+                  break;
+               default:
+                  System.out.println("Unrecognized choice!");
                   break;
             }
          } catch (Exception e) {
