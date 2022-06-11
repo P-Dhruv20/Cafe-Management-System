@@ -305,12 +305,12 @@ public class Cafe {
                            case 4:
                               UpdateOrder(esql);
                               break;
-			   case 5:
-				ViewOrderHistory(esql);
-				break;
-			   case 6:
-				ViewOrderStatus(esql);
-				break;
+                           case 5:
+                              ViewOrderHistory(esql);
+                              break;
+                           case 6:
+                              ViewOrderStatus(esql);
+                              break;
                            case 9:
                               usermenu = false;
                               break;
@@ -347,9 +347,14 @@ public class Cafe {
                            case 3:
                               PlaceOrder(esql);
                               break;
-			  case 6:
-				ViewOrderStatus(esql);
-				break;
+                           case 4:
+                              break;
+                           case 5:
+                              ViewCurrentOrders(esql);
+                              break;
+                           case 6:
+                              ViewOrderStatus(esql);
+                              break;
                            case 9:
                               usermenu = false;
                               break;
@@ -387,9 +392,14 @@ public class Cafe {
                            case 3:
                               PlaceOrder(esql);
                               break;
-			   case 6:
-				ViewOrderStatus(esql);
-				break;
+                           case 4:
+                              break;
+                           case 5:
+                              ViewCurrentOrders(esql);
+                              break;
+                           case 6:
+                              ViewOrderStatus(esql);
+                              break;
                            case 9:
                               usermenu = false;
                               break;
@@ -416,7 +426,7 @@ public class Cafe {
       }
    }
 
-    public static void Greeting() {
+   public static void Greeting() {
       System.out.println(
             "\n\n*******************************************************\n" +
                   "              User Interface      	               \n" +
@@ -576,7 +586,7 @@ public class Cafe {
     * // calculate total
     */
 
-  public static Integer PlaceOrder(Cafe esql) {
+   public static Integer PlaceOrder(Cafe esql) {
       /* declare variables */
       boolean isOrdering = true;
       boolean orderPlaced = false;
@@ -720,7 +730,6 @@ public class Cafe {
       }
       return orderid;
    }
-   
 
    public static void UpdateOrder(Cafe esql) {
       boolean isMenuOpen = true;
@@ -804,12 +813,13 @@ public class Cafe {
       }
    }
 
-   public static void ViewOrderHistory(Cafe esql){
-      try{
-         String query = String.format("SELECT * FROM Orders WHERE login = '%s' ORDER BY orderid desc LIMIT 5", authorisedUser);
+   public static void ViewOrderHistory(Cafe esql) {
+      try {
+         String query = String.format("SELECT * FROM Orders WHERE login = '%s' ORDER BY orderid desc LIMIT 5",
+               authorisedUser);
          int rowCount = esql.executeQueryAndPrintResult(query);
-      }catch(Exception e){
-         System.err.println (e.getMessage());
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
       }
    }
 
@@ -839,4 +849,152 @@ public class Cafe {
       }
    }
 
-}// end Cafe
+   public static void ViewCurrentOrder(Cafe esql) {
+      try {
+         String query = "SELECT orderid, timeStampRecieved FROM Orders WHERE paid=false AND timeStampRecieved>=NOW()-'1 day'::INTERVAL";
+         int rowCount = esql.executeQueryAndPrintResult(query);
+      } catch (Exception e) {
+         System.err.println(e.getMessage());
+      }
+   }
+
+   public static void UpdateMenu(Cafe esql) {
+      String query;
+      String itemName, itemDescription, itemType, itemImageURL;
+      float itemPrice;
+      int value;
+      boolean isActive = true;
+      while (isActive) {
+         try {
+            System.out.println("UPDATE MENU");
+            System.out.println("-------------");
+            System.out.println("1. Add item");
+            System.out.println("2. Delete item");
+            System.out.println("3. Update item");
+            System.out.println(".................");
+            System.out.println("9. Done updating");
+            switch (readChoice()) {
+               case 1:
+                  System.out.print("Please enter Item Name: ");
+                  itemName = in.readLine();
+                  if (itemName.length() == 0) {
+                     System.out.println("ERROR: no input provided");
+                     break;
+                  }
+                  System.out.print("Please enter Item type: ");
+                  itemType = in.readLine();
+                  if (itemType.length() == 0) {
+                     System.out.println("ERROR: no input provided");
+                     break;
+                  }
+                  System.out.println("Please enter Item price: ");
+                  try {
+                     itemPrice = Float.parseFloat(in.readLine());
+                  } catch (Exception e) {
+                     System.out.println("ERROR: invalid input");
+                     break;
+                  }
+                  System.out.println("Enter the description: ");
+                  itemDescription = in.readLine();
+                  System.out.println("Enter the image URL: ");
+                  itemImageURL = in.readLine();
+
+                  query = String.format(
+                        "INSERT INTO Menu (itemName, type, price, description, imageURL) VALUES ('%s', '%s', '%s', '%s', '%s')",
+                        itemName, itemType, itemPrice, itemDescription, itemImageURL);
+                  esql.executeUpdate(query);
+                  System.out.println("Added item to menu.");
+                  break;
+               case 2:
+                  System.out.println("Please enter the item name: ");
+                  itemName = in.readLine();
+                  query = String.format("SELECT * FROM Menu WHERE itemName='%s'", itemName);
+                  value = esql.executeQuery(query);
+                  if (value > 0) {
+                     query = String.format("DELETE FROM Menu WHERE itemName='%s'", itemName);
+                     esql.executeUpdate(query);
+                     System.out.println("Item deleted from menu.");
+                     break;
+                  } else {
+                     System.out.println("ERROR: item does not exist");
+                     break;
+                  }
+               case 3:
+                  System.out.println("Please enter the item name: ");
+                  itemName = in.readLine();
+                  query = String.format("SELECT * FROM Menu WHERE itemName='%s'", itemName);
+                  value = esql.executeQuery(query);
+                  if (value > 0) {
+                     boolean up_menu = true;
+                     while (up_menu) {
+                        System.out.println("UPDATE ITEM");
+                        System.out.println("-----------");
+                        System.out.println("1. Type");
+                        System.out.println("2. Price");
+                        System.out.println("3. Description");
+                        System.out.println("4. Image URL");
+                        System.out.println("..............");
+                        System.out.println("9. Done updating");
+                        switch (readChoice()) {
+                           case 1:
+                              System.out.println("Please enter the new type: ");
+                              itemType = in.readLine();
+                              if (itemType.length() == 0) {
+                                 System.out.println("ERROR: no input provided");
+                                 break;
+                              }
+                              query = String.format("UPDATE Menu SET type='%s' WHERE itemName='%s'", itemType,
+                                    itemName);
+                              esql.executeUpdate(query);
+                              System.out.println("Item type updated.");
+                              break;
+                           case 2:
+                              System.out.println("Please enter the new price: ");
+                              try {
+                                 itemPrice = Float.parseFloat(in.readLine());
+                              } catch (Exception e) {
+                                 System.out.println("ERROR: invalid input");
+                                 break;
+                              }
+                              query = String.format("UPDATE Menu SET price='%s' WHERE itemName='%s'", itemPrice,
+                                    itemName);
+                              esql.executeUpdate(query);
+                              System.out.println("Item price updated.");
+                              break;
+                           case 3:
+                              System.out.println("Please enter the new description: ");
+                              itemDescription = in.readLine();
+                              query = String.format("UPDATE Menu SET description='%s' WHERE itemName='%s'",
+                                    itemDescription,
+                                    itemName);
+                              esql.executeUpdate(query);
+                              System.out.println("Item description updated.");
+                              break;
+                           case 4:
+                              System.out.println("Please enter the new image URL: ");
+                              itemImageURL = in.readLine();
+                              query = String.format("UPDATE Menu SET imageURL='%s' WHERE itemName='%s'", itemImageURL,
+                                    itemName);
+                              esql.executeUpdate(query);
+                              System.out.println("Item image URL updated.");
+                              break;
+                           case 9:
+                              up_menu = false;
+                              break;
+                        }
+                     }
+                  } else {
+                     System.out.println("ERROR: item does not exist");
+                     break;
+                  }
+               case 9:
+                  isActive = false;
+                  break;
+            }
+         } catch (Exception e) {
+            System.err.println(e.getMessage());
+         }
+      }
+   }
+}
+// end Cafe
